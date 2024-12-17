@@ -1,0 +1,18 @@
+# Fdb version 3
+["pdflatex"] 1734400614 "/home/rohit/CP Repositories/icpc_notebook/content/kactl.tex" "kactl.pdf" "kactl" 1734400614
+  "/etc/texmf/web2c/texmf.cnf" 1734352190 475 c0e671620eb5563b2130f56340a5fde8 ""
+  "/home/rohit/.texlive2021/texmf-var/web2c/pdftex/pdflatex.fmt" 1734355716 1405653 3383bd8adf1d7c50893ac87529442dd0 ""
+  "/home/rohit/CP Repositories/icpc_notebook/content/kactl.tex" 1734400614 945 8c26dc9b9240b327d6bb2a6e4a9c8e17 ""
+  "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
+  "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr9.tfm" 1136768653 1292 6b21b9c2c7bebb38aa2273f7ca0fb3af ""
+  "/usr/share/texlive/texmf-dist/tex/latex/base/exscale.sty" 1622581934 2581 12a83a02567771ef5d33f928a69ec41c ""
+  "/usr/share/texlive/texmf-dist/tex/latex/extsizes/extreport.cls" 1137110130 23786 cbd79291aa0922c48a73753b97cabb5f ""
+  "/usr/share/texlive/texmf-dist/tex/latex/extsizes/size9.clo" 1137110130 6172 b9daf86befd6903b2699dddbd6fb97c1 ""
+  "/usr/share/texlive/texmf-dist/web2c/texmf.cnf" 1644012257 39432 7155514e09a3d69036fac785183a21c2 ""
+  "/usr/share/texmf/web2c/texmf.cnf" 1644012257 39432 7155514e09a3d69036fac785183a21c2 ""
+  "kactl.aux" 1734400614 32 3985256e7290058c681f74d7a3565a19 ""
+  "kactl.tex" 1734400614 945 8c26dc9b9240b327d6bb2a6e4a9c8e17 ""
+  "kactlpkg.sty" 0 -1 0 ""
+  (generated)
+  "kactl.log"
+  "kactl.pdf"
