@@ -8,6 +8,8 @@
  */
 #pragma once
 
+// Returns {even, odd} each value denotes how much left/right u can go from this point
+
 array<vi, 2> manacher(const string& s) {
 	int n = sz(s);
 	array<vi,2> p = {vi(n+1), vi(n)};
@@ -20,4 +22,17 @@ array<vi, 2> manacher(const string& s) {
 		if (R>r) l=L, r=R;
 	}
 	return p;
+}
+
+pii getLongestPal(const array<vi, 2> &p){
+  int idx = 0, len = 1;
+  for(int i = 0;i<sz(p[1]);i++){
+    if(2*p[0][i] > len) len = 2*p[0][i], idx = i - p[0][i];
+    if(2*p[1][i] + 1 > len) len = 2*p[1][i] + 1, idx = i - p[1][i];
+  }
+  return {idx, len};
+}
+bool isPal(int l, int r,const array<vi, 2> &p){
+  int len = r-l+1;
+  return p[len%2][l+len/2] >= len/2;
 }

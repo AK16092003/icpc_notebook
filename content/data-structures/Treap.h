@@ -10,58 +10,73 @@
  */
 #pragma once
 
-struct Node {
-	Node *l = 0, *r = 0;
-	int val, y, c = 1;
-	Node(int val) : val(val), y(rand()) {}
-	void recalc();
+struct Treap{
+  int data, priority, subtreeSize;
+  long long sum;
+  bool rev;
+  Treap *left, *right;
+  Treap(int d);
 };
-
-int cnt(Node* n) { return n ? n->c : 0; }
-void Node::recalc() { c = cnt(l) + cnt(r) + 1; }
-
-template<class F> void each(Node* n, F f) {
-	if (n) { each(n->l, f); f(n->val); each(n->r, f); }
+int size(Treap *t){
+  return t ? t->subtreeSize : 0;
+}
+long long getSum(Treap *t){
+  return t ? t->sum : 0;
+}
+void pull(Treap *t){
+  if(!t) return;
+  t->subtreeSize = 1 + size(t->left) + size(t->right);
+  t->sum = t->data + getSum(t->left) + getSum(t->right);
+}
+Treap::Treap(int d){
+  this->data = d;
+  priority = rand(0, INT_MAX);
+  subtreeSize = 1;
+  sum = d;
+  rev = false;
+  left = right = NULL;
+  pull(this);
+}
+void push(Treap *t){
+  if(!t) return;
+  if(t->rev){
+    swap(t->left, t->right);
+    if(t->left) t->left->rev ^= 1;
+    if(t->right) t->right->rev ^= 1;
+    t->rev = 0;
+  }
+  pull(t);
+}
+pair<Treap*, Treap*> split(Treap *t, int k){
+  if(!t) return {NULL, NULL};
+  push(t);
+  if(size(t->left) >= k){
+    auto [lTreap, rTreap] = split(t->left, k);
+    t->left = rTreap;
+    pull(t);
+    return {lTreap, t};
+  } else {
+    k = k - size(t->left) - 1;
+    auto [lTreap, rTreap] = split(t->right, k);
+    t->right = lTreap;
+    pull(t);
+    return {t, rTreap};
+  }
+  return {NULL, NULL};
+}
+Treap* merge(Treap *l, Treap *r){
+  if(!l) return r;
+  if(!r) return l;
+  push(l);push(r);
+  if(l->priority < r->priority){
+    l->right = merge(l->right, r);
+    pull(l);
+    return l;
+  }
+  else{
+    r->left = merge(l, r->left);
+    pull(r);
+    return r;
+  }
 }
 
-pair<Node*, Node*> split(Node* n, int k) {
-	if (!n) return {};
-	if (cnt(n->l) >= k) { // "n->val >= k" for lower_bound(k)
-		auto pa = split(n->l, k);
-		n->l = pa.second;
-		n->recalc();
-		return {pa.first, n};
-	} else {
-		auto pa = split(n->r, k - cnt(n->l) - 1); // and just "k"
-		n->r = pa.first;
-		n->recalc();
-		return {n, pa.second};
-	}
-}
-
-Node* merge(Node* l, Node* r) {
-	if (!l) return r;
-	if (!r) return l;
-	if (l->y > r->y) {
-		l->r = merge(l->r, r);
-		l->recalc();
-		return l;
-	} else {
-		r->l = merge(l, r->l);
-		r->recalc();
-		return r;
-	}
-}
-
-Node* ins(Node* t, Node* n, int pos) {
-	auto [l,r] = split(t, pos);
-	return merge(merge(l, n), r);
-}
-
-// Example application: move the range [l, r) to index k
-void move(Node*& t, int l, int r, int k) {
-	Node *a, *b, *c;
-	tie(a,b) = split(t, l); tie(b,c) = split(b, r - l);
-	if (k <= l) t = merge(ins(a, b, k), c);
-	else t = merge(a, ins(c, b, k - r));
-}

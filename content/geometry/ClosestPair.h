@@ -11,20 +11,45 @@
 
 #include "Point.h"
 
-typedef Point<ll> P;
-pair<P, P> closest(vector<P> v) {
-	assert(sz(v) > 1);
-	set<P> S;
-	sort(all(v), [](P a, P b) { return a.y < b.y; });
-	pair<ll, pair<P, P>> ret{LLONG_MAX, {P(), P()}};
-	int j = 0;
-	for (P p : v) {
-		P d{1 + (ll)sqrt(ret.first), 0};
-		while (v[j].y <= p.y - d.x) S.erase(v[j++]);
-		auto lo = S.lower_bound(p - d), hi = S.upper_bound(p + d);
-		for (; lo != hi; ++lo)
-			ret = min(ret, {(*lo - p).dist2(), {*lo, p}});
-		S.insert(p);
-	}
-	return ret.second;
+ll ClosestPairDist(vector<point> &p, ll l, ll r){ // accurate
+   // returns the square of the two closest points in range [l, r]
+   if(l >= r) return 8e18 ;
+   ll mid = (l + r) / 2 ;
+
+   ll DisL = ClosestPairDist(p, l, mid);
+   ll DisR = ClosestPairDist(p, mid + 1, r);
+
+   ll allowD = min(DisL, DisR);
+
+   vector<point> candidates ;
+   for(auto i = l; i <= r; i ++){
+      point v = p[i];
+      ll d = v.X - p[mid].X;
+      if(d * d <= allowD) candidates.push_back(v);
+   }
+
+   sort(all(candidates), [&](point x, point y){
+      return x.Y != y.Y ? x.Y < y.Y : x.X < y.X ;
+   });
+
+
+   for(ll i = 0 ; i < sz(candidates); i ++){ // this won'b be n^2
+      for(ll j = i + 1; j < sz(candidates) ; j ++){ 
+         ll dx = candidates[i].X - candidates[j].X ;
+         ll dy = candidates[i].Y - candidates[j].Y ;
+
+         if(dy * dy >= allowD) break; // this limits to maximum 7 iterations
+         allowD = min(allowD, dx * dx + dy * dy);
+      }
+   }
+
+   return allowD;
+}
+ll ClosestPairDist(vector<point> &a){
+   // returns the square of the two closest points
+   sort(all(a), [&](point x, point y){
+      return x.X == y.X ? x.Y < y.Y : x.X < y.X ;
+   });
+
+   return ClosestPairDist(a, 0, a.size() - 1) ;
 }

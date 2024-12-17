@@ -11,26 +11,59 @@
  */
 #pragma once
 
-#include "../data-structures/RMQ.h"
+//nodes are 1-based indexing
+//initialize all parents to 0.
 
-struct LCA {
-	int T = 0;
-	vi time, path, ret;
-	RMQ<int> rmq;
+#define maxsz 200005
+#define logmax 18
 
-	LCA(vector<vi>& C) : time(sz(C)), rmq((dfs(C,0,-1), ret)) {}
-	void dfs(vector<vi>& C, int v, int par) {
-		time[v] = T++;
-		for (int y : C[v]) if (y != par) {
-			path.push_back(v), ret.push_back(time[v]);
-			dfs(C, y, v);
+ll parent[maxsz];
+ll level[maxsz];
+ll memo[maxsz][logmax];
+
+void preprocess(ll n)
+{
+	for(ll i = 0 ; i < logmax ; i ++)
+	{
+		for(ll j = 0 ; j <= n ; j ++)
+		{
+			if(i == 0) 
+			{
+				memo[j][i] = parent[j];
+			}
+			else{
+				memo[j][i] = memo[memo[j][i-1]][i-1];
+			}
+		}
+	}
+}
+
+int lca(ll  u , ll v)
+{
+	if(level[u] > level[v]) {
+		swap(u , v);
+	}		
+
+	for(int i = logmax-1 ; i>=0 ; i--) {
+		if(level[v] - (1ll << i) >= level[u])
+		{
+			v = memo[v][i];
 		}
 	}
 
-	int lca(int a, int b) {
-		if (a == b) return a;
-		tie(a, b) = minmax(time[a], time[b]);
-		return path[rmq.query(a, b)];
+	for(int i = logmax-1 ; i >= 0 ; i --)
+	{
+		if(memo[u][i] != memo[v][i])
+		{
+			u = memo[u][i];
+			v = memo[v][i];
+		}
 	}
-	//dist(a,b){return depth[a] + depth[b] - 2*depth[lca(a,b)];}
-};
+	
+	if(u != v)
+	{
+		u = memo[u][0];
+		v = memo[v][0];
+	}
+	return u;
+}

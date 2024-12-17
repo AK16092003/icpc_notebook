@@ -20,16 +20,49 @@ Points on the edge of the hull between two other points are not considered part 
 
 #include "Point.h"
 
-typedef Point<ll> P;
-vector<P> convexHull(vector<P> pts) {
-	if (sz(pts) <= 1) return pts;
-	sort(all(pts));
-	vector<P> h(sz(pts)+1);
-	int s = 0, t = 0;
-	for (int it = 2; it--; s = --t, reverse(all(pts)))
-		for (P p : pts) {
-			while (t >= s + 2 && h[t-2].cross(h[t-1], p) <= 0) t--;
-			h[t++] = p;
-		}
-	return {h.begin(), h.begin() + t - (t == 2 && h[0] == h[1])};
+vector<point> ConvexHull(vector<point> &p){ // accurate
+   // returns the convex Hull of some set of points
+   ll n = p.size();
+   if(n <= 2) return p ;
+
+   vector<point> up, down; // stores ans for top and bottom HULLS
+   vector<point> active ; // acts as stack
+   map<pll, ll> vis ; // helps avoid taking duplicates
+
+   sort(all(p), [&](point x, point y){
+      return x.X != y.X ? x.X < y.X : x.Y < y.Y ;
+   });
+
+   active.push_back(p[0]);
+   active.push_back(p[1]);
+
+   for(ll i = 2; i < n; i ++){
+      while(active.size() > 1 and cross(active[active.size() - 1] - active[active.size() - 2], p[i] - active[active.size() - 2]) > 0){
+         active.pop_back();
+      }
+      active.push_back(p[i]);
+   }
+
+   up = active ;
+   active.clear();
+
+   for(auto i: up) vis[{i.X, i.Y}] = 1 ;
+
+   active.push_back(up[up.size() - 2]);
+   active.push_back(up.back());
+
+   for(ll i = n - 2; i > -1; i --){
+      while(active.size() > 1 and cross(active[active.size() - 1] - active[active.size() - 2], p[i] - active[active.size() - 2]) > 0){
+         active.pop_back();
+      }
+      active.push_back(p[i]);
+   }
+
+   down = active ;
+
+   for(auto i: down) {
+      if(not vis[{i.X, i.Y}]) up.push_back(i);
+   }
+   return up;
 }
+

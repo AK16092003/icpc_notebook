@@ -17,25 +17,68 @@
  */
 #pragma once
 
-struct SuffixArray {
-	vi sa, lcp;
-	SuffixArray(string& s, int lim=256) { // or basic_string<int>
-		int n = sz(s) + 1, k = 0, a, b;
-		vi x(all(s)), y(n), ws(max(n, lim));
-		x.push_back(0), sa = lcp = y, iota(all(sa), 0);
-		for (int j = 0, p = 0; p < n; j = max(1, j * 2), lim = p) {
-			p = j, iota(all(y), n - j);
-			rep(i,0,n) if (sa[i] >= j) y[p++] = sa[i] - j;
-			fill(all(ws), 0);
-			rep(i,0,n) ws[x[i]]++;
-			rep(i,1,lim) ws[i] += ws[i - 1];
-			for (int i = n; i--;) sa[--ws[x[y[i]]]] = y[i];
-			swap(x, y), p = 1, x[sa[0]] = 0;
-			rep(i,1,n) a = sa[i - 1], b = sa[i], x[b] =
-				(y[a] == y[b] && y[a + j] == y[b + j]) ? p - 1 : p++;
-		}
-		for (int i = 0, j; i < n - 1; lcp[x[i++]] = k)
-			for (k && k--, j = sa[x[i] - 1];
-					s[i + k] == s[j + k]; k++);
+struct sufar {
+	string s;
+	vector<int>lcp,order,rank;
+	int n;
+	sufar(string _s) {
+	    s=_s +'$';
+	    n=s.length();
 	}
+	void build() {
+	    order.resize(n);
+	    rank.resize(n);
+	    {
+		    vector<pair<int,int>>temp;
+		    for(int i=0;i<n;i++){
+		        temp.push_back({s[i]-'a',i});
+		    }
+		    sort(temp.begin(),temp.end());
+		    for(int i =0;i<n;i++){
+		        order[i]=temp[i].second;
+		    }
+		    rank[order[0]]=0;
+		    for(int i=1;i<n;i++){
+		        rank[order[i]]=rank[order[i-1]]+(temp[i].first!=temp[i-1].first);
+		    }
+	    }
+ 
+		int k=0;
+		vector<int>order_t(n,0),rank_t(n,0);
+		while((1<<k)<n) {
+		   for(int i =0;i<n;i++){
+		      (order[i]-=(1<<k)-n)%=n;
+		   }
+		   vector<int>cnt(n,0),pos(n,0);
+		   for(auto &c:rank)
+			    cnt[c]++;
+		   for(int i=1;i<n;i++)
+			    pos[i]=pos[i-1]+cnt[i-1];
+		   for(int i=0;i<n;i++)
+			    order_t[pos[rank[order[i]]]++]=order[i];
+			    order=order_t;
+		   for(int i=1;i<n;i++){
+			    pair<int,int>old_val={rank[order[i-1]],rank[(order[i-1]+(1<<k))%n]};
+			    pair<int,int>new_val={rank[order[i]],rank[(order[i]+(1<<k))%n]};
+			    rank_t[order[i]]=rank_t[order[i-1]]+(old_val!=new_val);
+		   }
+		   rank=rank_t;
+		   k++;
+		}
+ 	}
+ 
+ 
+	void build_lcp(){
+	   lcp.resize(n,0);
+	   int k=0;
+	   for(int i=0;i<n-1;i++){
+	      int pos=rank[i];
+	      int j=order[pos-1];
+	      while(s[i+k]==s[j+k]) k++;
+	      lcp[pos]=k;
+		  k=max(k-1,(int)0);
+		}
+	   }
 };
+
+

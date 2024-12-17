@@ -15,51 +15,122 @@
  */
 #pragma once
 
-#include "../data-structures/LazySegmentTree.h"
-
-template <bool VALS_EDGES> struct HLD {
-	int N, tim = 0;
-	vector<vi> adj;
-	vi par, siz, rt, pos;
-	Node *tree;
-	HLD(vector<vi> adj_)
-		: N(sz(adj_)), adj(adj_), par(N, -1), siz(N, 1),
-		  rt(N),pos(N),tree(new Node(0, N)){ dfsSz(0); dfsHld(0); }
-	void dfsSz(int v) {
-		if (par[v] != -1) adj[v].erase(find(all(adj[v]), par[v]));
-		for (int& u : adj[v]) {
-			par[u] = v;
-			dfsSz(u);
-			siz[v] += siz[u];
-			if (siz[u] > siz[adj[v][0]]) swap(u, adj[v][0]);
-		}
-	}
-	void dfsHld(int v) {
-		pos[v] = tim++;
-		for (int u : adj[v]) {
-			rt[u] = (u == adj[v][0] ? rt[v] : u);
-			dfsHld(u);
-		}
-	}
-	template <class B> void process(int u, int v, B op) {
-		for (; rt[u] != rt[v]; v = par[rt[v]]) {
-			if (pos[rt[u]] > pos[rt[v]]) swap(u, v);
-			op(pos[rt[v]], pos[v] + 1);
-		}
-		if (pos[u] > pos[v]) swap(u, v);
-		op(pos[u] + VALS_EDGES, pos[v] + 1);
-	}
-	void modifyPath(int u, int v, int val) {
-		process(u, v, [&](int l, int r) { tree->add(l, r, val); });
-	}
-	int queryPath(int u, int v) { // Modify depending on problem
-		int res = -1e9;
-		process(u, v, [&](int l, int r) {
-				res = max(res, tree->query(l, r));
-		});
-		return res;
-	}
-	int querySubtree(int v) { // modifySubtree is similar
-		return tree->query(pos[v] + VALS_EDGES, pos[v] + siz[v]);
-	}
+struct HLD {
+  int n;
+  vector<int> siz, top, dep, par, in, out, seq;
+  vector<vector<int>> adj;
+  int timer;
+  
+  HLD() {}
+  HLD(int n) {
+    init(n);
+  }
+  void init(int n) {
+    this->n = n;
+    siz.resize(n);
+    top.resize(n);
+    dep.resize(n);
+    par.resize(n);
+    in.resize(n);
+    out.resize(n);
+    seq.resize(n);
+    timer = -1;
+    adj.assign(n, {});
+  }
+  void addEdge(int u, int v) {
+    adj[u].push_back(v);
+    adj[v].push_back(u);
+  }
+  void work(int root = 0) {
+    top[root] = root;
+    dep[root] = 0;
+    par[root] = -1;
+    dfs1(root);
+    dfs2(root);
+  }
+  void dfs1(int u) {
+    if (par[u] != -1) {
+      adj[u].erase(find(adj[u].begin(), adj[u].end(), par[u]));
+    }
+    
+    siz[u] = 1;
+    for (auto &v : adj[u]) {
+      par[v] = u;
+      dep[v] = dep[u] + 1;
+      dfs1(v);
+      siz[u] += siz[v];
+      if (siz[v] > siz[adj[u][0]]) {
+        swap(v, adj[u][0]);
+      }
+    }
+  }
+  void dfs2(int u) {
+    in[u] = ++timer;
+    seq[in[u]] = u;
+    for (auto v : adj[u]) {
+      top[v] = v == adj[u][0] ? top[u] : v;
+      dfs2(v);
+    }
+    out[u] = timer;
+  }
+  int lca(int u, int v) {
+    while (top[u] != top[v]) {
+      if (dep[top[u]] > dep[top[v]]) {
+        u = par[top[u]];
+      } else {
+        v = par[top[v]];
+      }
+    }
+    return dep[u] < dep[v] ? u : v;
+  }
+  
+  int dist(int u, int v) {
+    return dep[u] + dep[v] - 2 * dep[lca(u, v)];
+  }
+  
+  int jump(int u, int k) {
+    if (dep[u] < k) {
+      return -1;
+    }
+    
+    int d = dep[u] - k;
+    
+    while (dep[top[u]] > d) {
+      u = par[top[u]];
+    }
+    
+    return seq[in[u] - dep[u] + d];
+  }
+  
+  bool isAncester(int u, int v) {
+    return in[u] <= in[v] && in[v] <= out[u];
+  }
+  
+  int rootedParent(int u, int v) {
+    swap(u, v);
+    if (u == v) {
+      return u;
+    }
+    if (!isAncester(u, v)) {
+      return par[u];
+    }
+    auto it = upper_bound(adj[u].begin(), adj[u].end(), v, [&](int x, int y) {
+      return in[x] < in[y];
+    }) - 1;
+    return *it;
+  }
+  
+  int rootedSize(int u, int v) {
+    if (u == v) {
+      return n;
+    }
+    if (!isAncester(v, u)) {
+      return siz[v];
+    }
+    return n - siz[rootedParent(u, v)];
+  }
+  
+  int rootedLca(int a, int b, int c) {
+    return lca(a, b) ^ lca(b, c) ^ lca(c, a);
+  }
 };
