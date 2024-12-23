@@ -134,3 +134,33 @@ struct HLD {
     return lca(a, b) ^ lca(b, c) ^ lca(c, a);
   }
 };
+
+// Segtree ( optional )
+template<class T> struct Seg { // comb(ID,b) = b
+    const T ID = -1; T comb(T a, T b) { return max(a,b); }
+    int n; vector<T> seg;
+    void init(int _n) { n = _n; seg.assign(2*n,ID); }
+    void pull(int p) { seg[p] = comb(seg[2*p],seg[2*p+1]); }
+    void upd(int p, T val) { // set val at position p
+        seg[p += n] = val; for (p /= 2; p; p /= 2) pull(p); }
+    T query(int l, int r) {	// query on interval [l, r]
+        T ra = ID, rb = ID;
+        for (l += n, r += n+1; l < r; l /= 2, r /= 2) {
+            if (l&1) ra = comb(ra,seg[l++]);
+            if (r&1) rb = comb(seg[--r],rb);
+        }
+        return comb(ra,rb);
+    }
+};
+
+int getans(int x, int y, HLD &t, Seg<int> &st) {
+  int ans = -1;
+  while (t.top[x] != t.top[y]) {
+    if (t.dep[t.top[x]] > t.dep[t.top[y]]) swap(x, y);
+    ans = max(ans, st.query(t.in[t.top[y]], t.in[y]));
+    y = t.parent[t.top[y]];
+  }
+  if (t.dep[x] > t.dep[y]) swap(x, y);
+  ans = max(ans, st.query(t.in[x], t.in[y]));
+  return ans;
+}

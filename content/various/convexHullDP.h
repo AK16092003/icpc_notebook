@@ -3,12 +3,12 @@
  * License: CC0
  * Source: http://codeforces.com/blog/entry/8219
  * Description: convex hull trick DP
- * Time: O(N^2)
+ * Time: O(Nlog(N))
  */
 
 #pragma once
 
-// Container where you can add lines of the form kx+m, and query maximum values at points // x.
+// Container where you can add lines of the form kx + m, and query maximum values at points x.
 
 struct Line {
 	mutable ll k, m, p;

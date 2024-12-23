@@ -7,6 +7,7 @@
  */
 
 #pragma once
+// null point exception error when BinTrie is empty
 
 struct BinTrie {
   static const int B = 31; // change if LL

@@ -7,6 +7,8 @@
  * Time: O(\log N).
  * Usage: node *head = build(arr , 0 , N);
  */
+ 
+ // pass by ref in build function
 ll f(ll x , ll y) {
 	return (x + y);
 }
@@ -20,6 +22,7 @@ struct node {
     }
 };
 
+// always considered in [lx, rx)
 node* build(ll a[], ll lx, ll rx) {
     if (rx - lx == 1)
         return new node(a[lx]);

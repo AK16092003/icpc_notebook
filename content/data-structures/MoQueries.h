@@ -24,7 +24,7 @@ struct Query {
     }
 };
  
-vl mo_s_algorithm(vector<Query> queries) {
+vll mo_s_algorithm(vector<Query> queries) {
  
     vector<ll> answers(queries.size());
     sort(queries.begin(), queries.end());

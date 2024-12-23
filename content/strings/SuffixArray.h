@@ -17,6 +17,9 @@
  */
 #pragma once
 
+// order[i] -> ith smallest suffix starting index
+// rank[i]  -> s[i..n] rank in sorted suffix seq.
+
 struct sufar {
 	string s;
 	vector<int>lcp,order,rank;
